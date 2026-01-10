@@ -1,0 +1,150 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+@TeleOp(name = "StarterBotTeleop_2 (Blocks to Java)")
+public class StarterBotTeleop_2 extends LinearOpMode {
+
+  private DcMotor launcher;
+  private DcMotor left_drive;
+  private DcMotor right_drive;
+  private CRServo left_feeder;
+  private CRServo right_feeder;
+
+  String IDLE;
+  String SPIN_UP;
+  String LAUNCH;
+  String launchState;
+  int LAUNCHER_TARGET_VELOCITY;
+  String LAUNCHING;
+  int LAUNCHER_MIN_VELOCITY;
+  ElapsedTime launchTime;
+
+  /**
+   * Describe this function...
+   */
+  private void initMotors() {
+    launcher.setDirection(DcMotor.Direction.REVERSE);
+    left_drive.setDirection(DcMotor.Direction.REVERSE);
+    launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    left_drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    right_drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    left_feeder.setDirection(CRServo.Direction.FORWARD);
+    left_feeder.setPower(0);
+    right_feeder.setPower(0);
+  }
+
+  /**
+   * Describe this function...
+   */
+  private void createVariables() {
+    IDLE = "IDLE";
+    SPIN_UP = "SPIN_UP";
+    LAUNCH = "LAUNCH";
+    LAUNCHING = "LAUNCHING";
+    launchState = IDLE;
+    LAUNCHER_TARGET_VELOCITY = 1125;
+    LAUNCHER_MIN_VELOCITY = 775;
+    launchTime = new ElapsedTime();
+  }
+
+  /**
+   * This file includes a teleop (driver-controlled) file for the goBILDA® StarterBot for the
+   * 2025-2026 FIRST® Tech Challenge season DECODE™. It leverages a differential/Skid-Steer
+   * system for robot mobility, one high-speed motor driving two "launcher wheels",
+   * and two servos which feed that launcher. Likely the most niche concept we'll
+   * leverage in this example is closed-loop motor velocity control. This control
+   * method reads the current speed as reported by the motor's encoder and applies
+   * a varying amount of power to reach, and then hold a target velocity. The FTC
+   * SDK calls this control method "RUN_USING_ENCODER". This contrasts to the
+   * default "RUN_WITHOUT_ENCODER" where you control the power applied to the
+   * motor directly. Since the dynamics of a launcher wheel system varies greatly
+   * from those of most other FTC mechanisms, we will also need to adjust the
+   * "PIDF" coefficients with some that are a better fit for our application.
+   */
+  @Override
+  public void runOpMode() {
+    launcher = hardwareMap.get(DcMotor.class, "launcher");
+    left_drive = hardwareMap.get(DcMotor.class, "left_drive");
+    right_drive = hardwareMap.get(DcMotor.class, "right_drive");
+    left_feeder = hardwareMap.get(CRServo.class, "left_feeder");
+    right_feeder = hardwareMap.get(CRServo.class, "right_feeder");
+
+    // Put initialization blocks here.
+    right_feeder.setDirection(CRServo.Direction.REVERSE);
+    createVariables();
+    initMotors();
+    waitForStart();
+    if (opModeIsActive()) {
+      // Put run blocks here.
+      while (opModeIsActive()) {
+        // Put loop blocks here.
+        arcadeDrive(-gamepad1.left_stick_y, gamepad1.right_stick_x);
+        if (gamepad1.circle) {
+          left_feeder.setPower(1);
+          right_feeder.setPower(1);
+        } else {
+          left_feeder.setPower(0);
+          right_feeder.setPower(0);
+        }
+        launch(gamepad1.triangle);
+        telemetry.addData("Launch State", launchState);
+        telemetry.addData("Launcher Motor Velocity", ((DcMotorEx) launcher).getVelocity());
+        telemetry.addData("Launch Time", launchTime);
+        telemetry.update();
+        if (gamepad1.square) {
+          ((DcMotorEx) launcher).setVelocityPIDFCoefficients(0, 0, 0, 0);
+        }
+        if (gamepad1.triangle) {
+          ((DcMotorEx) launcher).setVelocityPIDFCoefficients(18.9, 0, 0, 0);
+        }
+      }
+    }
+  }
+
+  /**
+   * This takes input from the joysticks, and applies power to the left and right
+   * drive motor to move the robot as requested by the driver. "arcade" refers to
+   * the control style we're using here. Much like a classic arcade game, when you
+   * move the left joystick forward both motors work to drive the robot forward, and
+   * when you move the right joystick left and right both motors work to rotate the
+   * robot. Combinations of these inputs can be used to create more complex maneuvers.
+   */
+  private void arcadeDrive(float forward, float rotate) {
+    left_drive.setPower(forward + rotate);
+    right_drive.setPower(forward - rotate);
+  }
+
+  /**
+   * Describe this function...
+   */
+  private void launch(boolean shotRequested) {
+    if (launchState.equals(IDLE)) {
+      if (shotRequested == true) {
+        launchState = SPIN_UP;
+      }
+    } else if (launchState.equals(SPIN_UP)) {
+      ((DcMotorEx) launcher).setVelocity(LAUNCHER_TARGET_VELOCITY);
+      if (((DcMotorEx) launcher).getVelocity() > LAUNCHER_MIN_VELOCITY) {
+        launchState = LAUNCH;
+      }
+    } else if (launchState.equals(LAUNCH)) {
+      left_feeder.setPower(0);
+      right_feeder.setPower(0);
+      launchTime.reset();
+      launchState = LAUNCHING;
+    } else if (launchState.equals(LAUNCHING)) {
+      if (launchTime.seconds() > 0.2) {
+        left_feeder.setPower(0);
+        right_feeder.setPower(0);
+        launchState = IDLE;
+      }
+    }
+  }
+}
