@@ -7,8 +7,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp(name = "StarterBotTeleop_2 (Blocks to Java)")
-public class StarterBotTeleop_2 extends LinearOpMode {
+@TeleOp(name = "Artemis.code (Blocks to Java)")
+public class Artemis.code extends LinearOpMode {
 
   private DcMotor launcher;
   private DcMotor left_drive;
@@ -25,9 +25,7 @@ public class StarterBotTeleop_2 extends LinearOpMode {
   int LAUNCHER_MIN_VELOCITY;
   ElapsedTime launchTime;
 
-  /**
-   * Describe this function...
-   */
+// Inital Motors
   private void initMotors() {
     launcher.setDirection(DcMotor.Direction.REVERSE);
     left_drive.setDirection(DcMotor.Direction.REVERSE);
@@ -40,9 +38,7 @@ public class StarterBotTeleop_2 extends LinearOpMode {
     right_feeder.setPower(0);
   }
 
-  /**
-   * Describe this function...
-   */
+ // Variables for launch
   private void createVariables() {
     IDLE = "IDLE";
     SPIN_UP = "SPIN_UP";
@@ -101,9 +97,7 @@ public class StarterBotTeleop_2 extends LinearOpMode {
     right_drive.setPower(forward - rotate);
   }
 
-  /**
-   * Describe this function...
-   */
+    //Launcher
   private void launch(boolean shotRequested) {
     if (launchState.equals(IDLE)) {
       if (shotRequested == true) {
