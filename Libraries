@@ -37,3 +37,4 @@
 #include <units/velocity.h>
 #include <units/voltage.h>
 #include <units/volume.h>
+#include <units/math.h>
