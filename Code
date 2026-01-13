@@ -54,20 +54,7 @@ public class StarterBotTeleop_2 extends LinearOpMode {
     launchTime = new ElapsedTime();
   }
 
-  /**
-   * This file includes a teleop (driver-controlled) file for the goBILDA® StarterBot for the
-   * 2025-2026 FIRST® Tech Challenge season DECODE™. It leverages a differential/Skid-Steer
-   * system for robot mobility, one high-speed motor driving two "launcher wheels",
-   * and two servos which feed that launcher. Likely the most niche concept we'll
-   * leverage in this example is closed-loop motor velocity control. This control
-   * method reads the current speed as reported by the motor's encoder and applies
-   * a varying amount of power to reach, and then hold a target velocity. The FTC
-   * SDK calls this control method "RUN_USING_ENCODER". This contrasts to the
-   * default "RUN_WITHOUT_ENCODER" where you control the power applied to the
-   * motor directly. Since the dynamics of a launcher wheel system varies greatly
-   * from those of most other FTC mechanisms, we will also need to adjust the
-   * "PIDF" coefficients with some that are a better fit for our application.
-   */
+
   @Override
   public void runOpMode() {
     launcher = hardwareMap.get(DcMotor.class, "launcher");
@@ -76,15 +63,15 @@ public class StarterBotTeleop_2 extends LinearOpMode {
     left_feeder = hardwareMap.get(CRServo.class, "left_feeder");
     right_feeder = hardwareMap.get(CRServo.class, "right_feeder");
 
-    // Put initialization blocks here.
+    // Initialization blocks here.
     right_feeder.setDirection(CRServo.Direction.REVERSE);
     createVariables();
     initMotors();
     waitForStart();
     if (opModeIsActive()) {
-      // Put run blocks here.
+      // Run blocks here.
       while (opModeIsActive()) {
-        // Put loop blocks here.
+        // Loop blocks here.
         arcadeDrive(-gamepad1.left_stick_y, gamepad1.right_stick_x);
         if (gamepad1.circle) {
           left_feeder.setPower(1);
@@ -108,14 +95,7 @@ public class StarterBotTeleop_2 extends LinearOpMode {
     }
   }
 
-  /**
-   * This takes input from the joysticks, and applies power to the left and right
-   * drive motor to move the robot as requested by the driver. "arcade" refers to
-   * the control style we're using here. Much like a classic arcade game, when you
-   * move the left joystick forward both motors work to drive the robot forward, and
-   * when you move the right joystick left and right both motors work to rotate the
-   * robot. Combinations of these inputs can be used to create more complex maneuvers.
-   */
+
   private void arcadeDrive(float forward, float rotate) {
     left_drive.setPower(forward + rotate);
     right_drive.setPower(forward - rotate);
